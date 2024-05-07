@@ -7,6 +7,7 @@ import database.CSVLogEventHandler;
 import database.CSVProgramStatusHandler;
 import database.CSVRobotHandler;
 import database.CSVStaticVariableHandler;
+import server.DbServer;
 import tables.LogEvent;
 import tables.ProgramStatus;
 import tables.Robot;
@@ -14,6 +15,9 @@ import tables.StaticVariables;
 
 public class Main {
     public static void main(String[] args) {
+
+        DbServer dbServer = new DbServer(12345);
+        dbServer.start();
 
         // // Guardar robot
         // // Crear una nueva instancia de Robot
