@@ -13,11 +13,16 @@ import tables.ProgramStatus;
 import tables.Robot;
 import tables.StaticVariables;
 
+import utils.GenerateId;
+
 public class Main {
     public static void main(String[] args) {
 
         DbServer dbServer = new DbServer(12345);
         dbServer.start();
+
+        // int nextRobotId = GenerateId.getLastId("robots.csv") + 1;
+        // System.out.print(nextRobotId);
 
         // // Guardar robot
         // // Crear una nueva instancia de Robot

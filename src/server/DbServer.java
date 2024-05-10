@@ -5,6 +5,9 @@ import java.net.*;
 
 import org.json.JSONObject;
 
+import tables.Robot;
+import database.CSVRobotHandler;
+import utils.GenerateId;
 
 public class DbServer {
     private ServerSocket serverSocket;
@@ -22,7 +25,6 @@ public class DbServer {
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("DBServer: Client connected.");
 
                 // Iniciar un hilo para manejar la conexión con el cliente
                 Thread clientThread = new Thread(() -> handleClient(clientSocket));
@@ -33,23 +35,6 @@ public class DbServer {
         }
     }
 
-    // private void handleClient(Socket clientSocket) {
-    // try {
-    // BufferedReader in = new BufferedReader(new
-    // InputStreamReader(clientSocket.getInputStream()));
-
-    // String inputLine;
-    // while ((inputLine = in.readLine()) != null) {
-    // System.out.println("DBServer: Received message from client: " + inputLine);
-    // // Aquí puedes procesar el mensaje recibido según sea necesario
-    // }
-
-    // clientSocket.close();
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
-
     private void handleClient(Socket clientSocket) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -58,18 +43,28 @@ public class DbServer {
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("DBServer: Received message from client: " + inputLine);
 
-                // Convertir el JSON recibido en un objeto JSONObject
+                // Convert received JSON string to JSON object
                 JSONObject jsonObject = new JSONObject(inputLine);
 
-                // Obtener los valores del objeto JSONObject
-                int robotId = jsonObject.getInt("robotId");
+                // Get the values ​​of the JSONObject object
+                String tableName = jsonObject.getString("tableName");
                 int robotType = jsonObject.getInt("robotType");
                 boolean isTurnedOn = jsonObject.getBoolean("isTurnedOn");
 
-                // Aquí puedes procesar los valores según sea necesario
-                System.out.println("Robot ID: " + robotId);
-                System.out.println("Robot Type: " + robotType);
-                System.out.println("Robot is turned on: " + isTurnedOn);
+                //Get next id
+                int nextRobotId = GenerateId.getLastId("robots.csv") + 1;
+
+                // Create instance of Roboy and CSVRobotHandler
+                Robot nuevoRobot = new Robot(nextRobotId, robotType, isTurnedOn);
+                CSVRobotHandler CSVRobotHandler = new CSVRobotHandler();
+
+                try {
+                    CSVRobotHandler.saveRobot(nuevoRobot, tableName);
+                    System.out.println("Robot guardado exitosamente en el archivo CSV.");
+
+                } catch (IOException e) {
+                    System.out.println("Error al guardar el robot: " + e.getMessage());
+                }
             }
 
             clientSocket.close();
@@ -77,6 +72,8 @@ public class DbServer {
             e.printStackTrace();
         }
     }
+
+
 
     public void stop() {
         try {

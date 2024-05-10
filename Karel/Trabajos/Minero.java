@@ -38,6 +38,10 @@ public class Minero extends AugmentedRobot implements Directions {
 	private static final int VETA_CALLE = 11;
 	private static final int VETA_ESPERA_AVENIDA = 14;
 	private static final int VETA_ESPERA_CALLE = 10;
+	
+	private static final String ROBOT_TABLE = "robots.csv";
+	private static final String PROGRAM_STATUS_TABLE = "programStatuscsv";
+
 	// Static common robot data for the specific problem
 	// Robot arrayList
 	private static ArrayList<Object> objRobots;
@@ -776,11 +780,13 @@ public class Minero extends AugmentedRobot implements Directions {
 				calle = CALLE_TREN;
 				colorRobot = Color.BLUE;
 				cantidad = cantidadTrenes;
+
 				break;
 			case TIPO_EXTRACTOR:
 				calle = CALLE_EXTRACTOR;
 				colorRobot = Color.RED;
 				cantidad = cantidadExtractores;
+
 				break;
 		}
 
@@ -795,8 +801,14 @@ public class Minero extends AugmentedRobot implements Directions {
 				Minero.objRobots.add(robot);
 				Minero.objThreads.add(new Thread(robot));
 
-				String mensajeRobot = "Robot" + i + " Active Red 10 20";
-				out.println(mensajeRobot);
+				String jsonRobot = "{"
+						+ "\"tableName\":" + ROBOT_TABLE + ","
+						+ "\"robotType\":" + tipoRobot + ","
+						+ "\"isTurnedOn\":true" + ","
+						+ "}";
+
+				// Send JSON string to the server
+				out.println(jsonRobot);
 			}
 
 			// Cerrar la conexion después de enviar la información de todos los robots
@@ -805,8 +817,6 @@ public class Minero extends AugmentedRobot implements Directions {
 			e.printStackTrace();
 		}
 	}
-
-
 
 	// Verifies if a String contains only numbers
 	private static boolean isNumeric(final CharSequence cs) {
