@@ -173,7 +173,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			move();
 			posicion = Integer.toString(calleActual) + " - " + Integer.toString(avenidaActual);
 			// Release previous position where it was and update robot atrributes
-			ejecutarLog = (debugHabilitado) ? logMensaje("Libero posición anterior") : false;
+			ejecutarLog = (debugHabilitado) ? logMensaje("Libero posicion anterior") : false;
 			objPosiciones.retirarPosicion(posicion);
 			calleActual = nuevaCalle;
 			avenidaActual = nuevaAvenida;
@@ -182,8 +182,8 @@ public class Minero extends AugmentedRobot implements Directions {
 		}
 		// Finally, releases the semaphore
 		sem_move.release();
-		ejecutarLog = (debugHabilitado) ? logMensaje("Semáforo Move liberado") : false;
-		// Fin Sección crítica
+		ejecutarLog = (debugHabilitado) ? logMensaje("Semaforo Move liberado") : false;
+		// Fin Seccion critica
 	}
 
 	private void generateEventLogs() {
@@ -293,7 +293,7 @@ public class Minero extends AugmentedRobot implements Directions {
 				minerosSalida++;
 			if (minerosSalida == cantidadMineros) {
 				try {
-					ejecutarLog = (debugHabilitado) ? logMensaje("Solo el último minero puede activar los trenes")
+					ejecutarLog = (debugHabilitado) ? logMensaje("Solo el ultimo minero puede activar los trenes")
 							: false;
 					sem_salida.acquire();
 				} catch (InterruptedException exc) {
@@ -310,7 +310,7 @@ public class Minero extends AugmentedRobot implements Directions {
 				trenesSalida++;
 			if (trenesSalida == cantidadTrenes) {
 				try {
-					ejecutarLog = (debugHabilitado) ? logMensaje("Solo el último tren puede activar los extractores")
+					ejecutarLog = (debugHabilitado) ? logMensaje("Solo el ultimo tren puede activar los extractores")
 							: false;
 					sem_salida.acquire();
 				} catch (InterruptedException exc) {
@@ -355,7 +355,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			mover();
 			turnLeft();
 		} else {
-			ejecutarLog = (debugHabilitado) ? logMensaje("Primer minero, encontré la veta") : false;
+			ejecutarLog = (debugHabilitado) ? logMensaje("Primer minero, encontre la veta") : false;
 			encontroVeta = true;
 			mover();
 		}
@@ -444,7 +444,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		while (anyBeepersInBeeperBag()) {
 			putBeeper();
 			currentBeeps--;
-			// generateEventLogs();
+			generateEventLogs();
 			arr_bodegas[bodegaEnUso]++;
 			if (arr_bodegas[bodegaEnUso] == BEEPERS_POR_BODEGA) {
 				bodegaEnUso++;
@@ -494,11 +494,11 @@ public class Minero extends AugmentedRobot implements Directions {
 	private void procesarExtractor() {
 		int beepers = 0;
 		// Picks the beepers from the Train Delivery point
-		ejecutarLog = (debugHabilitado) ? logMensaje("Tomando beepers del punto de extracción") : false;
+		ejecutarLog = (debugHabilitado) ? logMensaje("Tomando beepers del punto de extraccion") : false;
 		while (nextToABeeper() && beepers < BEEPERS_EXTRACTOR) {
 			pickBeeper();
 			currentBeeps++;
-			// generateEventLogs();
+			generateEventLogs();
 			beepers++;
 		}
 		// If vein is empty and already put all beepers on the Warehouse, release and
@@ -525,7 +525,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			pickBeeper();
 			beepers++;
 			currentBeeps++;
-			// generateEventLogs();
+			generateEventLogs();
 			beepersExtraidos--;
 		}
 		// Go to the delivery point
@@ -544,7 +544,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		for (int i = beepers; i > 0; i--) {
 			putBeeper();
 			currentBeeps--;
-			// generateEventLogs();
+			generateEventLogs();
 		}
 		// ... and goes back to the vein delivery point
 		turnLeft();
@@ -636,9 +636,9 @@ public class Minero extends AugmentedRobot implements Directions {
 			// allows them to move.
 			ejecutarLog = (debugHabilitado) ? logMensaje("Me muevo") : false;
 			mover();
-			ejecutarLog = (debugHabilitado) ? logMensaje("No ha iniciado extracción?") : false;
+			ejecutarLog = (debugHabilitado) ? logMensaje("No ha iniciado extraccion?") : false;
 			if (!inicioExtraccion && beepersExtraidos >= BEEPERS_TREN) {
-				ejecutarLog = (debugHabilitado) ? logMensaje("Notifica que si inició") : false;
+				ejecutarLog = (debugHabilitado) ? logMensaje("Notifica que si inicio") : false;
 				inicioExtraccion = true;
 				ejecutarLog = (debugHabilitado)
 						? logMensaje("" + sem_trenInicioProceso.availablePermits() + " <= " + (cantidadTrenes - 1))
@@ -647,7 +647,7 @@ public class Minero extends AugmentedRobot implements Directions {
 					sem_trenInicioProceso.release();
 			}
 			// A robot went to the end of the vein, so there's no more beepers.
-			ejecutarLog = (debugHabilitado) ? logMensaje("Llegó al fondo de la veta??") : false;
+			ejecutarLog = (debugHabilitado) ? logMensaje("Llego al fondo de la veta??") : false;
 			if (fondoVeta) {
 				ejecutarLog = (debugHabilitado) ? logMensaje("Si --> mina vacia") : false;
 				minaVacia = true;
@@ -656,7 +656,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			// Unload beepers in the vein delivery point
 			descargar();
 			ejecutarLog = (debugHabilitado)
-					? logMensaje("No está la mina vacia o si está y no ha terminado de extraer?")
+					? logMensaje("No esta la mina vacia o si esta y no ha terminado de extraer?")
 					: false;
 			// If there's still beepers in the vein...
 			if (!minaVacia || (minaVacia && !extraccionCompleta)) {
@@ -696,7 +696,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			if (nextToABeeper()) {
 				pickBeeper();
 				currentBeeps++;
-				// generateEventLogs();
+				generateEventLogs();
 				i++;
 			} else {
 				if (!frontIsClear())
@@ -714,10 +714,10 @@ public class Minero extends AugmentedRobot implements Directions {
 			putBeeper();
 			beepersExtraidos++;
 			currentBeeps--;
-			// generateEventLogs();
+			generateEventLogs();
 		}
 		ejecutarLog = (debugHabilitado)
-				? logMensaje("Termine descarga. Si hay más de " + BEEPERS_TREN
+				? logMensaje("Termine descarga. Si hay mas de " + BEEPERS_TREN
 						+ " beepers en el punto de espera, suelto un tren.")
 				: false;
 		if (beepersExtraidos >= BEEPERS_TREN)
@@ -761,7 +761,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		turnLeft();
 		// Extractor in mine release the lock for the other
 		if (tipoRobot == TIPO_EXTRACTOR && extraccionCompleta) {
-			ejecutarLog = (debugHabilitado) ? logMensaje("Libero extractor que está en bodega.") : false;
+			ejecutarLog = (debugHabilitado) ? logMensaje("Libero extractor que esta en bodega.") : false;
 			sem_extIngreso.release();
 		}
 	}
@@ -864,7 +864,7 @@ public class Minero extends AugmentedRobot implements Directions {
 				out.println(jsonRobot);
 			}
 
-			// Cerrar la conexion después de enviar la información de todos los robots
+			// Cerrar la conexion despues de enviar la informacion de todos los robots
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();

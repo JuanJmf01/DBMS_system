@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import org.json.JSONObject;
 
+import constants.Constants;
 import tables.LogEvent;
 import tables.Robot;
 import database.CSVEventHandler;
@@ -30,7 +31,7 @@ public class DbServer {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
 
-                // Iniciar un hilo para manejar la conexión con el cliente
+                // Iniciar un hilo para manejar la conexion con el cliente
                 Thread clientThread = new Thread(() -> handleClient(clientSocket));
                 clientThread.start();
             }
@@ -54,13 +55,12 @@ public class DbServer {
                 String tableName = jsonObject.getString("tableName");
 
                 // Por que no esta entrando a estos condicionales?
-                if (tableName.equals("robots.csv")) {
+                if (tableName.equals(Constants.DEFAULT_ROBOT_TABLE_NAME)) {
                     handleRobotQueries(jsonObject, tableName);
-                } else if (tableName.equals("logEvents.csv")) {
+                } else if (tableName.equals(Constants.DEFAULT_LOG_EVENT_TABLE_NAME)) {
                     handleLogEventsQueries(jsonObject, tableName);
-                } else if (tableName.equals("events.csv")) {
+                } else if (tableName.equals(Constants.DEFAULT_EVENT_TABLE_NAME)) {
                     handleEventsQueries(jsonObject, tableName);
-
                 }
 
             }
@@ -76,7 +76,7 @@ public class DbServer {
         boolean isTurnedOn = jsonObject.getBoolean("isTurnedOn");
 
         // Get next id
-        int nextRobotId = GenerateId.getLastId("robots.csv") + 1;
+        int nextRobotId = GenerateId.getLastId(Constants.DEFAULT_ROBOT_TABLE_NAME) + 1;
 
         // Create instance of Roboy and CSVRobotHandler
         Robot nuevoRobot = new Robot(nextRobotId, robotType, isTurnedOn);

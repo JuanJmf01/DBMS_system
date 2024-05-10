@@ -16,6 +16,7 @@ import tables.LogEvent;
 
 public class CSVEventHandler {
 
+
     public void saveAndUpdateEvent(LogEvent event, String tableName) throws IOException {
         // Verificar si el archivo CSV existe
         File file = new File(tableName);
@@ -24,10 +25,10 @@ public class CSVEventHandler {
             createNewCSVFile(tableName);
         }
 
-        // Configura el formato de la fecha y hora
+        // Configurar el formato de la fecha y hora
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // Leer el archivo CSV y cargar los datos en un mapa para facilitar la búsqueda
+        // Leer el archivo CSV y cargar los datos en un mapa para facilitar la busqueda
         Map<Integer, List<String>> dataMap = readDataFromFile(tableName);
 
         // Obtener el robotId del evento
@@ -42,7 +43,7 @@ public class CSVEventHandler {
             rowData.set(3, Integer.toString(event.getStreet())); // Update street
             rowData.set(4, Integer.toString(event.getSirens())); // Update sirens
 
-            // Escribir la línea actualizada en el archivo CSV
+            // Escribir la linea actualizada en el archivo CSV
             writeDataToFile(tableName, dataMap);
         } else {
             // El robotId no existe, crea una nueva entrada en el archivo CSV
@@ -55,7 +56,7 @@ public class CSVEventHandler {
         }
     }
 
-    // Método para escribir los datos actualizados en el archivo CSV
+    // Metodo para escribir los datos actualizados en el archivo CSV
     private void writeDataToFile(String fileName, Map<Integer, List<String>> dataMap) throws IOException {
         FileWriter fileWriter = new FileWriter(fileName);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
@@ -70,26 +71,23 @@ public class CSVEventHandler {
         bufferedWriter.close();
     }
 
-    // Método para leer los datos del archivo CSV y cargarlos en un mapa
+    // Metodo para leer los datos del archivo CSV y cargarlos en un mapa
     private Map<Integer, List<String>> readDataFromFile(String fileName) throws IOException {
         Map<Integer, List<String>> dataMap = new HashMap<>();
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         String line;
-        boolean firstLine = true; // Para omitir la primera línea (encabezados)
+        boolean firstLine = true; // Para omitir la primera linea (encabezados)
         while ((line = br.readLine()) != null) {
             if (firstLine) {
                 firstLine = false;
-                continue; // Saltar la primera línea (encabezados)
+                continue; // Saltar la primera linea (encabezados)
             }
             String[] parts = line.split(",");
             int robotId;
             try {
                 robotId = Integer.parseInt(parts[0]);
             } catch (NumberFormatException e) {
-                // Si el primer campo no es un número, puedes manejarlo como desees
-                // Por ejemplo, puedes omitir esta línea o lanzar una excepción
-                System.err.println("Error: El primer campo no es un número en la línea: " + line);
-                continue; // Saltar esta línea y continuar con la siguiente
+                continue; // Saltar esta linea y continuar con la siguiente
             }
             List<String> rowData = Arrays.asList(parts);
             dataMap.put(robotId, rowData);
@@ -98,7 +96,7 @@ public class CSVEventHandler {
         return dataMap;
     }
 
-    // Método para agregar una línea al archivo CSV
+    // Metodo para agregar una linea al archivo CSV
     private void appendLineToFile(String fileName, String line) throws IOException {
         FileWriter fileWriter = new FileWriter(fileName, true);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
@@ -107,10 +105,10 @@ public class CSVEventHandler {
         bufferedWriter.close();
     }
 
-    // Método para crear un nuevo archivo en caso de que no exista
+    // Metodo para crear un nuevo archivo en caso de que no exista
     private void createNewCSVFile(String fileName) throws IOException {
         FileWriter writer = new FileWriter(fileName);
-        writer.write("robotId,timestamp,avenue,street,sirens\n"); // Escribir la primera línea con los encabezados
+        writer.write("robotId,timestamp,avenue,street,sirens\n"); // Escribir la primera linea con los encabezados
         writer.close();
     }
 
