@@ -31,7 +31,6 @@ public class DbServer {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
 
-                // Iniciar un hilo para manejar la conexion con el cliente
                 Thread clientThread = new Thread(() -> handleClient(clientSocket));
                 clientThread.start();
             }
@@ -46,7 +45,7 @@ public class DbServer {
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                // ("DBServer: Received message from client: " + inputLine);
+                // System.out.println("DBServer: Received message from client: " + inputLine);
 
                 // Convert received JSON string to JSON object
                 JSONObject jsonObject = new JSONObject(inputLine);
@@ -54,7 +53,6 @@ public class DbServer {
                 // Get the values ​​of the JSONObject object
                 String tableName = jsonObject.getString("tableName");
 
-                // Por que no esta entrando a estos condicionales?
                 if (tableName.equals(Constants.DEFAULT_ROBOT_TABLE_NAME)) {
                     handleRobotQueries(jsonObject, tableName);
                 } else if (tableName.equals(Constants.DEFAULT_LOG_EVENT_TABLE_NAME)) {

@@ -159,6 +159,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		int nuevaAvenida = determineNuevaAvenida();
 		String posicion = Integer.toString(nuevaCalle) + " - " + Integer.toString(nuevaAvenida);
 		generateEventLogs();
+		generateEvent();
 
 		// Critical area: Check if the position is occupated. If find it in the
 		// objPosiciones, the position it tries to get is occupated, so it gets locked
@@ -192,14 +193,33 @@ public class Minero extends AugmentedRobot implements Directions {
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
 			String jsonRobot = "{"
-					// + "\"tableName\":" + LOG_EVENT_TABLE + ","
-					+ "\"tableName\":" + EVENT_TABLE + ","
+					+ "\"tableName\":\"" + LOG_EVENT_TABLE + "\","
 					+ "\"robotId\":" + id + ","
 					+ "\"avenue\":" + avenidaActual + ","
 					+ "\"street\":" + calleActual + ","
-					+ "\"sirens\":" + currentBeeps + ","
+					+ "\"sirens\":" + currentBeeps
 					+ "}";
+			// Send JSON string to the server
+			out.println(jsonRobot);
 
+			socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void generateEvent() {
+		try {
+			Socket socket = new Socket("localhost", 12345);
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+			String jsonRobot = "{"
+					+ "\"tableName\":\"" + EVENT_TABLE + "\","
+					+ "\"robotId\":" + id + ","
+					+ "\"avenue\":" + avenidaActual + ","
+					+ "\"street\":" + calleActual + ","
+					+ "\"sirens\":" + currentBeeps
+					+ "}";
 			// Send JSON string to the server
 			out.println(jsonRobot);
 
@@ -444,7 +464,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		while (anyBeepersInBeeperBag()) {
 			putBeeper();
 			currentBeeps--;
-			generateEventLogs();
+			generateEvent();
 			arr_bodegas[bodegaEnUso]++;
 			if (arr_bodegas[bodegaEnUso] == BEEPERS_POR_BODEGA) {
 				bodegaEnUso++;
@@ -498,7 +518,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		while (nextToABeeper() && beepers < BEEPERS_EXTRACTOR) {
 			pickBeeper();
 			currentBeeps++;
-			generateEventLogs();
+			generateEvent();
 			beepers++;
 		}
 		// If vein is empty and already put all beepers on the Warehouse, release and
@@ -525,7 +545,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			pickBeeper();
 			beepers++;
 			currentBeeps++;
-			generateEventLogs();
+			generateEvent();
 			beepersExtraidos--;
 		}
 		// Go to the delivery point
@@ -544,7 +564,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		for (int i = beepers; i > 0; i--) {
 			putBeeper();
 			currentBeeps--;
-			generateEventLogs();
+			generateEvent();
 		}
 		// ... and goes back to the vein delivery point
 		turnLeft();
@@ -696,7 +716,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			if (nextToABeeper()) {
 				pickBeeper();
 				currentBeeps++;
-				generateEventLogs();
+				generateEvent();
 				i++;
 			} else {
 				if (!frontIsClear())
@@ -714,7 +734,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			putBeeper();
 			beepersExtraidos++;
 			currentBeeps--;
-			generateEventLogs();
+			generateEvent();
 		}
 		ejecutarLog = (debugHabilitado)
 				? logMensaje("Termine descarga. Si hay mas de " + BEEPERS_TREN
@@ -828,17 +848,17 @@ public class Minero extends AugmentedRobot implements Directions {
 				colorRobot = Color.BLACK;
 				cantidad = cantidadMineros;
 				break;
+
 			case TIPO_TREN:
 				calle = CALLE_TREN;
 				colorRobot = Color.BLUE;
 				cantidad = cantidadTrenes;
-
 				break;
+
 			case TIPO_EXTRACTOR:
 				calle = CALLE_EXTRACTOR;
 				colorRobot = Color.RED;
 				cantidad = cantidadExtractores;
-
 				break;
 		}
 
@@ -953,7 +973,7 @@ public class Minero extends AugmentedRobot implements Directions {
 	// Setup Karel World
 	private static void setupWorld(String mundo) {
 		World.readWorld(mundo);
-		World.setDelay(20);
+		World.setDelay(15);
 		World.setVisible(true);
 	}
 

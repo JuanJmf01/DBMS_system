@@ -19,10 +19,12 @@ public class CSVRobotHandler {
         }
 
         // Escribir la informacion del robot en el archivo
-        String line = robot.getRobotId() + "," + robot.getRobotType() + "," + robot.isTurnedOn();
+        String line = robot.getRobotId() + "," +
+                robot.getRobotType() + "," +
+                robot.isTurnedOn();
+
         bufferedWriter.write(line);
         bufferedWriter.newLine();
-
         bufferedWriter.close();
     }
 
