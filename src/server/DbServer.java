@@ -2,17 +2,8 @@ package server;
 
 import java.io.*;
 import java.net.*;
-import java.time.LocalDateTime;
-
 import org.json.JSONObject;
-
-import constants.Constants;
-import tables.LogEvent;
-import tables.Robot;
-import database.CSVEventHandler;
-import database.CSVLogEventHandler;
-import database.CSVRobotHandler;
-import utils.GenerateId;
+import requestHandlers.RequestHandlers;
 
 public class DbServer {
     private ServerSocket serverSocket;
@@ -50,78 +41,22 @@ public class DbServer {
                 // Convert received JSON string to JSON object
                 JSONObject jsonObject = new JSONObject(inputLine);
 
-                // Get the values ​​of the JSONObject object
-                String tableName = jsonObject.getString("tableName");
+                // Get queryType ​​of the JSONObject object
+                String queryType = jsonObject.getString("queryType");
 
-                if (tableName.equals(Constants.DEFAULT_ROBOT_TABLE_NAME)) {
-                    handleRobotQueries(jsonObject, tableName);
-                } else if (tableName.equals(Constants.DEFAULT_LOG_EVENT_TABLE_NAME)) {
-                    handleLogEventsQueries(jsonObject, tableName);
-                } else if (tableName.equals(Constants.DEFAULT_EVENT_TABLE_NAME)) {
-                    handleEventsQueries(jsonObject, tableName);
+                RequestHandlers requestHandlers = new RequestHandlers();
+
+                if (queryType.equals("GET")) {
+                    requestHandlers.handleGet(jsonObject);
+                } else if (queryType.equals("POST")) {
+                    requestHandlers.handlePost(jsonObject);
+                } else if (queryType.equals("PUT")) {
+                    requestHandlers.handlePut(jsonObject);
                 }
-
             }
             clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void handleRobotQueries(JSONObject jsonObject, String tableName) {
-        // int robotId = jsonObject.getInt("robotId");
-        int robotType = jsonObject.getInt("robotType");
-        boolean isTurnedOn = jsonObject.getBoolean("isTurnedOn");
-
-        // Get next id
-        int nextRobotId = GenerateId.getLastId(Constants.DEFAULT_ROBOT_TABLE_NAME) + 1;
-
-        // Create instance of Roboy and CSVRobotHandler
-        Robot nuevoRobot = new Robot(nextRobotId, robotType, isTurnedOn);
-        CSVRobotHandler CSVRobotHandler = new CSVRobotHandler();
-
-        try {
-            CSVRobotHandler.saveRobot(nuevoRobot, tableName);
-            // System.out.println("Robot successfully saved to CSV file.");
-
-        } catch (IOException e) {
-            System.out.println("Error saving robot: " + e.getMessage());
-        }
-    }
-
-    public void handleLogEventsQueries(JSONObject jsonObject, String tableName) {
-        int robotId = jsonObject.getInt("robotId");
-        int avenue = jsonObject.getInt("avenue");
-        int street = jsonObject.getInt("street");
-        int sirens = jsonObject.getInt("sirens");
-
-        // Create instance of Roboy and CSVRobotHandler
-        LogEvent newLogEvent = new LogEvent(robotId, LocalDateTime.now(), avenue, street, sirens);
-        CSVLogEventHandler CSVLogEventHandler = new CSVLogEventHandler();
-
-        try {
-            CSVLogEventHandler.saveEvent(newLogEvent, tableName);
-            // System.out.println("Event successfully saved to CSV file.");
-
-        } catch (IOException e) {
-            System.out.println("Error saving robot: " + e.getMessage());
-        }
-    }
-
-    public void handleEventsQueries(JSONObject jsonObject, String tableName) {
-        int robotId = jsonObject.getInt("robotId");
-        int avenue = jsonObject.getInt("avenue");
-        int street = jsonObject.getInt("street");
-        int sirens = jsonObject.getInt("sirens");
-
-        // Create instance of Roboy and CSVRobotHandler
-        LogEvent newLogEvent = new LogEvent(robotId, LocalDateTime.now(), avenue, street, sirens);
-        CSVEventHandler CSVEventHandler = new CSVEventHandler();
-        try {
-            CSVEventHandler.saveAndUpdateEvent(newLogEvent, tableName);
-            // System.out.println("Event successfully saved to CSV file.");
-        } catch (IOException e) {
-            System.out.println("Error saving robot: " + e.getMessage());
         }
     }
 

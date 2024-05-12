@@ -109,22 +109,6 @@ public class Minero extends AugmentedRobot implements Directions {
 
 	// Runnable method that starts the thread
 	public void run() {
-		// try {
-		// Socket socket = new Socket("localhost", 12345);
-		// PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-		// String jsonRobot = "{"
-		// + "\"tableName\":" + ROBOT_TABLE + ","
-		// + "\"robotType\":"+ objRobots +","
-		// + "\"isTurnedOn\":true" + ","
-		// + "}";
-
-		// // Send JSON string to the server
-		// out.println(jsonRobot);
-
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
 		ejecutarMina();
 	}
 
@@ -158,8 +142,6 @@ public class Minero extends AugmentedRobot implements Directions {
 		int nuevaCalle = determineNuevaCalle();
 		int nuevaAvenida = determineNuevaAvenida();
 		String posicion = Integer.toString(nuevaCalle) + " - " + Integer.toString(nuevaAvenida);
-		generateEventLogs();
-		generateEvent();
 
 		// Critical area: Check if the position is occupated. If find it in the
 		// objPosiciones, the position it tries to get is occupated, so it gets locked
@@ -178,6 +160,10 @@ public class Minero extends AugmentedRobot implements Directions {
 			objPosiciones.retirarPosicion(posicion);
 			calleActual = nuevaCalle;
 			avenidaActual = nuevaAvenida;
+
+			generateEventLogs();
+			updateEvent();
+
 		} catch (InterruptedException exc) {
 			System.out.println(exc);
 		}
@@ -187,20 +173,23 @@ public class Minero extends AugmentedRobot implements Directions {
 		// Fin Seccion critica
 	}
 
-	private void generateEventLogs() {
+	private static void connectionWithDbServer(String dataJsonString, String queryType, String tableName,
+			String filterField,
+			Integer filterValue) {
 		try {
 			Socket socket = new Socket("localhost", 12345);
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-			String jsonRobot = "{"
-					+ "\"tableName\":\"" + LOG_EVENT_TABLE + "\","
-					+ "\"robotId\":" + id + ","
-					+ "\"avenue\":" + avenidaActual + ","
-					+ "\"street\":" + calleActual + ","
-					+ "\"sirens\":" + currentBeeps
+			String jsonMessage = "{"
+					+ "\"queryType\":" + queryType + ","
+					+ "\"tableName\":" + tableName + ","
+					+ "\"filterField\":" + filterField + ","
+					+ "\"filterValue\":" + filterValue + ","
+					+ "\"data\": " + dataJsonString
 					+ "}";
-			// Send JSON string to the server
-			out.println(jsonRobot);
+
+			// Message for dbServer
+			out.println(jsonMessage);
 
 			socket.close();
 		} catch (IOException e) {
@@ -208,25 +197,33 @@ public class Minero extends AugmentedRobot implements Directions {
 		}
 	}
 
-	private void generateEvent() {
-		try {
-			Socket socket = new Socket("localhost", 12345);
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+	private void generateProgramStatus(String programStatus) {
+		String jsonRobot = "{"
+				+ "\"tableName\":\"" + PROGRAM_STATUS_TABLE + "\","
+				+ "\"programStatus\":" + programStatus + ","
+				+ "}";
+	}
 
-			String jsonRobot = "{"
-					+ "\"tableName\":\"" + EVENT_TABLE + "\","
-					+ "\"robotId\":" + id + ","
-					+ "\"avenue\":" + avenidaActual + ","
-					+ "\"street\":" + calleActual + ","
-					+ "\"sirens\":" + currentBeeps
-					+ "}";
-			// Send JSON string to the server
-			out.println(jsonRobot);
+	private void generateEventLogs() {
+		String jsonRobot = "{"
+				+ "\"robotId\":" + id + ","
+				+ "\"avenue\":" + avenidaActual + ","
+				+ "\"street\":" + calleActual + ","
+				+ "\"sirens\":" + currentBeeps
+				+ "}";
 
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		connectionWithDbServer(jsonRobot, "POST", LOG_EVENT_TABLE, null, null);
+	}
+
+	private void updateEvent() {
+		String jsonEvent = "{"
+				+ "\"robotId\":" + id + ","
+				+ "\"avenue\":" + avenidaActual + ","
+				+ "\"street\":" + calleActual + ","
+				+ "\"sirens\":" + currentBeeps + ","
+				+ "}";
+
+		connectionWithDbServer(jsonEvent, "PUT", EVENT_TABLE, "robotId", id);
 	}
 
 	// Movement inside the mine. No locking because there's a lock in the vein
@@ -236,8 +233,12 @@ public class Minero extends AugmentedRobot implements Directions {
 		int nuevaAvenida = determineNuevaAvenida();
 		ejecutarLog = (debugHabilitado) ? logMensaje("Me muevo en la mina") : false;
 		move();
+
 		calleActual = nuevaCalle;
 		avenidaActual = nuevaAvenida;
+
+		generateEventLogs();
+		updateEvent();
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -464,7 +465,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		while (anyBeepersInBeeperBag()) {
 			putBeeper();
 			currentBeeps--;
-			generateEvent();
+			updateEvent();
 			arr_bodegas[bodegaEnUso]++;
 			if (arr_bodegas[bodegaEnUso] == BEEPERS_POR_BODEGA) {
 				bodegaEnUso++;
@@ -518,7 +519,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		while (nextToABeeper() && beepers < BEEPERS_EXTRACTOR) {
 			pickBeeper();
 			currentBeeps++;
-			generateEvent();
+			updateEvent();
 			beepers++;
 		}
 		// If vein is empty and already put all beepers on the Warehouse, release and
@@ -545,7 +546,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			pickBeeper();
 			beepers++;
 			currentBeeps++;
-			generateEvent();
+			updateEvent();
 			beepersExtraidos--;
 		}
 		// Go to the delivery point
@@ -564,7 +565,7 @@ public class Minero extends AugmentedRobot implements Directions {
 		for (int i = beepers; i > 0; i--) {
 			putBeeper();
 			currentBeeps--;
-			generateEvent();
+			updateEvent();
 		}
 		// ... and goes back to the vein delivery point
 		turnLeft();
@@ -716,7 +717,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			if (nextToABeeper()) {
 				pickBeeper();
 				currentBeeps++;
-				generateEvent();
+				updateEvent();
 				i++;
 			} else {
 				if (!frontIsClear())
@@ -734,7 +735,7 @@ public class Minero extends AugmentedRobot implements Directions {
 			putBeeper();
 			beepersExtraidos++;
 			currentBeeps--;
-			generateEvent();
+			updateEvent();
 		}
 		ejecutarLog = (debugHabilitado)
 				? logMensaje("Termine descarga. Si hay mas de " + BEEPERS_TREN
@@ -837,6 +838,8 @@ public class Minero extends AugmentedRobot implements Directions {
 	// Create the robots in the World due to the type
 	public static void crearRobots(int tipoRobot) {
 		Color colorRobot = Color.WHITE;
+		String robotColorString = "";
+		String robotTypeString = "";
 		int calle = 0;
 		int cantidad = 0;
 		Minero robot;
@@ -846,48 +849,53 @@ public class Minero extends AugmentedRobot implements Directions {
 			case TIPO_MINERO:
 				calle = CALLE_MINERO;
 				colorRobot = Color.BLACK;
+				robotColorString = "BLACK";
+				robotTypeString = "MINERO";
 				cantidad = cantidadMineros;
 				break;
 
 			case TIPO_TREN:
 				calle = CALLE_TREN;
 				colorRobot = Color.BLUE;
+				robotColorString = "BLUE";
+				robotTypeString = "TREN";
 				cantidad = cantidadTrenes;
 				break;
 
 			case TIPO_EXTRACTOR:
 				calle = CALLE_EXTRACTOR;
 				colorRobot = Color.RED;
+				robotColorString = "RED";
+				robotTypeString = "EXTRACTOR";
 				cantidad = cantidadExtractores;
 				break;
 		}
 
-		try {
-			Socket socket = new Socket("localhost", 12345);
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+		// Creates the number of robots defined and adds to the ArrayList and to the
+		// Threads
+		for (int i = AVENIDA_INICIAL; i < (AVENIDA_INICIAL + cantidad); i++) {
+			robot = new Minero(calle, i, North, 0, colorRobot, tipoRobot, idsRobots);
+			Minero.objRobots.add(robot);
+			Minero.objThreads.add(new Thread(robot));
 
-			// Creates the number of robots defined and adds to the ArrayList and to the
-			// Threads
-			for (int i = AVENIDA_INICIAL; i < (AVENIDA_INICIAL + cantidad); i++) {
-				robot = new Minero(calle, i, North, 0, colorRobot, tipoRobot, idsRobots);
-				idsRobots++;
-				Minero.objRobots.add(robot);
-				Minero.objThreads.add(new Thread(robot));
+			String jsonRobot = "{"
+					+ "\"robotType\":" + tipoRobot + ","
+					+ "\"isTurnedOn\":true" + ","
+					+ "\"color\":" + robotColorString + ","
+					+ "\"robotTypeString\":" + robotTypeString + ","
+					+ "}";
 
-				String jsonRobot = "{"
-						+ "\"tableName\":" + ROBOT_TABLE + ","
-						+ "\"robotType\":" + tipoRobot + ","
-						+ "\"isTurnedOn\":true" + ","
-						+ "}";
+			String jsonEvent = "{"
+					+ "\"robotId\":" + idsRobots + ","
+					+ "\"avenue\":" + i + ","
+					+ "\"street\":" + calle + ","
+					+ "\"sirens\":" + 0 + ","
+					+ "}";
 
-				// Send JSON string to the server
-				out.println(jsonRobot);
-			}
+			connectionWithDbServer(jsonRobot, "POST", ROBOT_TABLE, null, null);
+			connectionWithDbServer(jsonEvent, "POST", EVENT_TABLE, null, null);
+			idsRobots++;
 
-			// Cerrar la conexion despues de enviar la informacion de todos los robots
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 

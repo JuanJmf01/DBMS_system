@@ -14,10 +14,10 @@ public class CSVLogEventHandler {
 
     private final Lock logEventLock = new ReentrantLock();
 
-    public void saveEvent(LogEvent event, String tableName) throws IOException {
+    public void saveLogEvent(LogEvent event, String tableName) throws IOException {
         logEventLock.lock();
         try {
-            // Configura el formato de la fecha y hora
+            // Configurar el formato de la fecha y hora
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             FileWriter fileWriter = new FileWriter(tableName, true);
@@ -31,14 +31,14 @@ public class CSVLogEventHandler {
                 bufferedWriter.newLine();
             }
 
-            // Formatea los datos del evento en una linea de texto CSV
+            // Formatear los datos del evento en una linea de texto CSV
             String line = event.getRobotId() + "," +
                     event.getTimeStamp().format(formatter) + "," +
                     event.getAvenue() + "," +
                     event.getStreet() + "," +
                     event.getSirens();
 
-            // Escribe la linea en el archivo CSV y cierra el archivo
+            // Escribir la linea en el archivo CSV y cierra el archivo
             bufferedWriter.write(line);
             bufferedWriter.newLine();
             bufferedWriter.close();
