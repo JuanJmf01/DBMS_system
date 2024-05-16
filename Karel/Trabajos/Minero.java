@@ -1,6 +1,8 @@
 import kareltherobot.*;
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -191,17 +193,25 @@ public class Minero extends AugmentedRobot implements Directions {
 			// Message for dbServer
 			out.println(jsonMessage);
 
+			// Leer respuesta del servidor
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			String response = in.readLine();
+			System.out.println("Response from server: " + response);
+
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void generateProgramStatus(String programStatus) {
+	private static void generateProgramStatus(String programStatus) {
 		String jsonRobot = "{"
 				+ "\"tableName\":\"" + PROGRAM_STATUS_TABLE + "\","
 				+ "\"programStatus\":" + programStatus + ","
 				+ "}";
+
+		connectionWithDbServer(jsonRobot, "POST", PROGRAM_STATUS_TABLE, null, null);
+
 	}
 
 	private void generateEventLogs() {
@@ -994,6 +1004,8 @@ public class Minero extends AugmentedRobot implements Directions {
 		crearRobots(TIPO_MINERO);
 		crearRobots(TIPO_TREN);
 		crearRobots(TIPO_EXTRACTOR);
+
+		generateProgramStatus("ENCENDIDO");
 
 		// Initialize the threads
 		for (int i = 0; i < objThreads.size(); i++)
